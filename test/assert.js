@@ -12,8 +12,8 @@ describe('assert', function () {
 
   it('fail', function () {
     chai.expect(function () {
-      assert.fail();
-    }).to.throw(chai.AssertionError);
+      assert.fail(0, 1, 'this has failed');
+    }).to.throw(chai.AssertionError, /this has failed/);
   });
 
   it('isTrue', function () {
@@ -391,27 +391,25 @@ describe('assert', function () {
   it('include', function() {
     assert.include('foobar', 'bar');
     assert.include([ 1, 2, 3], 3);
+    assert.include({a:1, b:2}, {b:2});
 
     err(function () {
       assert.include('foobar', 'baz');
-    }, "expected \'foobar\' to contain \'baz\'");
+    }, "expected \'foobar\' to include \'baz\'");
 
     err(function () {
       assert.include(undefined, 'bar');
-    }, "expected an array or string");
+    }, "expected undefined to include 'bar'");
   });
 
   it('notInclude', function () {
     assert.notInclude('foobar', 'baz');
     assert.notInclude([ 1, 2, 3 ], 4);
+    assert.notInclude(undefined, 'bar');
 
     err(function () {
       assert.notInclude('foobar', 'bar');
-    }, "expected \'foobar\' to not contain \'bar\'");
-
-    err(function () {
-      assert.notInclude(undefined, 'bar');
-    }, "expected an array or string");
+    }, "expected \'foobar\' to not include \'bar\'");
   });
 
   it('lengthOf', function() {
@@ -490,6 +488,10 @@ describe('assert', function () {
     assert.throws(function() { throw new Error('bar'); }, /bar/);
     assert.throws(function() { throw new Error('bar'); }, Error);
     assert.throws(function() { throw new Error('bar'); }, Error, 'bar');
+
+    var thrownErr = assert.throws(function() { throw new Error('foo'); });
+    assert(thrownErr instanceof Error, 'assert.throws returns error');
+    assert(thrownErr.message === 'foo', 'assert.throws returns error message');
 
     err(function () {
       assert.throws(function() { throw new Error('foo') }, TypeError);
